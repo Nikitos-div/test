@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>second</title>
+</head>
+<body>
+    <div id="root">
+        <div class="controllers">
+
+        </div>
+        <container-card class="container"> 
+        </container-card>
+    </div>
+    <script>
+        const initialState = [
+            {name: 'tel', tel: '89213', id: '123224'}, 
+            {name: 'tel', tel: '89213', id: '123224'}, 
+        ]
+        const fakeFetch = async () => {
+            const data = await fetch('').then(data => data.json()).catch(data => data)
+            console.log(data)
+            return data
+        }
+
+        
+        class CardContainer extends HTMLElement {
+            constructor() {
+                super()
+                this.containerElement = document.createElement('div')
+            }
+
+            render() {
+                const element = document.createElement('div')
+                this.insertAdjacentElement('beforeend', new CardElement())
+            }
+
+            connectedCallback() {
+                this.render()
+            }
+
+            static get observedAttributes() {
+                return ['data'];
+            }
+
+
+            attributeChangedCallback(name, oldValue, newValue) {
+                
+            }
+        }
+
+
+        class CardElement extends HTMLElement {
+            constructor() {
+                super()
+                this.telBlock = document.createElement('div')
+                this.nameBlock = document.createElement('div')
+            }
+            render() {
+               this.nameBlock.innerHTML = this.getAttribute('name')
+               this.telBlock.innerHTML = this.getAttribute('tel')
+            }
+
+            connectedCallback() {
+               this.insertAdjacentElement('beforeend', this.telBlock)
+               this.insertAdjacentElement('beforeend', this.nameBlock)
+                // браузер вызывает этот метод при добавлении элемента в документ
+                // (может вызываться много раз, если элемент многократно добавляется/удаляется)
+            }
+
+            disconnectedCallback() {
+            // браузер вызывает этот метод при удалении элемента из документа
+            // (может вызываться много раз, если элемент многократно добавляется/удаляется)
+            }
+
+            static get observedAttributes() {
+                return ['name', 'tel'];
+            }
+
+            attributeChangedCallback(name, oldValue, newValue) {
+                console.log(name, oldValue, newValue )
+                this.render()
+            }
+
+            adoptedCallback() {
+                // вызывается, когда элемент перемещается в новый документ
+                // (происходит в document.adoptNode, используется очень редко)
+            }
+
+        }
+        customElements.define('custom-card', CardElement)
+        customElements.define('container-card', CardContainer)
+        console.log(customElements)
+    </script>
+</body>
+</html>

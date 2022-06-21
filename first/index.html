@@ -1,0 +1,176 @@
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>first</title>
+     <style>
+         .container {
+            margin: auto;
+         }
+         .container > canvas {
+            border: 1px solid red; 
+         }
+     </style> 
+ </head>
+ <body>
+    <div class="container">
+        <canvas height="600" width="600" id="main-canvas"></canvas>
+        <canvas width="600" height="50" id="indicator-canvas"></canvas>
+    </div>
+    <script> 
+        const getCanvasNodes = (mainId, indicatorId) => {
+            const canvasElements = [
+                document.querySelector(`#${mainId}`) ?? new Error('error'),
+                document.querySelector(`#${indicatorId}`) ?? new Error('error'),
+            ]
+            canvasElements.forEach((elem, indexElem ) => {
+                if (elem instanceof Error) {
+                    alert('oh no')
+                    throw `with index ${indexElem} value is undefined`
+                }
+            })
+            return canvasElements
+        }
+        // https://stackoverflow.com/questions/25837158/how-to-draw-a-star-by-using-canvas-html5
+        const drawStar = ({ctxRef, startX, startY, spikes, outerRadius, innerRadius, color ='green'}) => {
+           let rotate = Math.PI / 2 * 3 
+           let currentX = startX
+           let currentY = startY
+           const step = Math.PI / spikes
+
+           ctxRef.beginPath()
+           ctxRef.moveTo(startX, startY - outerRadius) 
+           for (let i = 0; i < spikes; i++) {
+               currentX = startX + Math.cos(rotate) * outerRadius
+               currentY = startY + Math.sin(rotate) * outerRadius
+               ctxRef.lineTo(currentX, currentY)
+               rotate+=step
+
+               currentX = startX + Math.cos(rotate) * innerRadius
+               currentY = startY + Math.sin(rotate) * innerRadius
+               ctxRef.lineTo(currentX, currentY)
+               rotate+=step
+           } 
+            ctxRef.lineTo(startX,startY-outerRadius)
+            ctxRef.closePath()
+            ctxRef.lineWidth=0 
+            ctxRef.strokeStyle=color
+            ctxRef.stroke()
+            ctxRef.fillStyle = color
+            ctxRef.fill()
+            
+        }
+        // drawStar(mainCanvasCtx, 100, 100, 5, 30, 15)
+        const initLayout = (canvasCtx, canvas) => {
+            canvasCtx.fillStyle = "white";
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        const initStarsOnMainCanvasByStep = (config , step = 50) => {
+            for(let i = 0; i < config.length; ++i) {
+                console.log(config[i])
+                let {startY, ...rest} = config[i]
+                startY+=step
+                step+=100
+                console.log(startY)
+                drawStar({startY, ...rest})
+            }
+        }
+
+        const fillIndicatorCanvas = (canvas, canvasCtx, color) => {
+            canvasCtx.fillStyle = color
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height)
+        }        
+        
+        const getPixelColor = (pixel) => {
+            return `rgb(${pixel[0]},${pixel[1]},${pixel[2]})`
+        }
+
+        const getCursorPositionOnCanvas = (event, canvas) => {
+            return {
+                x: event.clientX - canvas.offsetLeft,
+                y: event.clientY - canvas.offsetTop
+            }
+        }
+
+        const initCanvasStarsConfig = (ctx) => [
+            {
+                ctxRef: ctx, 
+                startX: 100, 
+                startY: 50, 
+                spikes: 5, 
+                outerRadius: 30, 
+                innerRadius: 15,
+                color: 'red', 
+              
+            }, 
+            {
+                ctxRef: ctx, 
+                startX: 100, 
+                startY: 50, 
+                spikes: 5, 
+                outerRadius: 30, 
+                innerRadius: 15, 
+                color: 'blue',
+               
+            }, 
+            {
+                ctxRef: ctx, 
+                startX: 100, 
+                startY: 50, 
+                spikes: 5, 
+                outerRadius: 30, 
+                innerRadius: 15,
+                color: 'green', 
+            
+            }, 
+            {
+                ctxRef: ctx, 
+                startX: 100, 
+                startY: 50, 
+                spikes: 5, 
+                outerRadius: 30, 
+                innerRadius: 15,
+                color: 'yellow',
+              
+            }, 
+            {
+                ctxRef: ctx, 
+                startX: 100, 
+                startY: 50, 
+                spikes: 5, 
+                outerRadius: 30, 
+                innerRadius: 15,
+                color: 'black',
+              
+            },  
+        ]
+
+        const onClickCallback = (mainCanvas, mainCanvasCtx, indicatorCanvas, indicatorCanvasCtx) => (event) => {
+            const cursorPos = getCursorPositionOnCanvas(event, mainCanvas)
+            const pixel = mainCanvasCtx.getImageData(cursorPos.x, cursorPos.y, 1, 1).data
+            const color = getPixelColor(pixel)
+            fillIndicatorCanvas(indicatorCanvas, indicatorCanvasCtx, color)
+        }
+        
+        const [mainCanvas, indicatorCanvas] = getCanvasNodes('main-canvas', 'indicator-canvas')
+        const mainCanvasCtx = mainCanvas.getContext('2d'), indicatorCanvasCtx = indicatorCanvas.getContext('2d')
+
+        initLayout(mainCanvasCtx, mainCanvas) 
+        initStarsOnMainCanvasByStep(initCanvasStarsConfig(mainCanvasCtx))
+        
+        mainCanvas.addEventListener('click', 
+            onClickCallback(
+                mainCanvas,
+                mainCanvasCtx,
+                indicatorCanvas,
+                indicatorCanvasCtx
+            )
+        ) 
+
+    </script>
+ </body>
+
+ </html>
